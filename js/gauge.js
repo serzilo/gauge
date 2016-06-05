@@ -4,7 +4,7 @@ function Gauge(data) {
 	this.defaults = {
 		id: 'gauge',
 		range: [0, 10, 20, 30, 40, 50, 60],
-		angle: 240,
+		angle: 270,
 		stroke: '#636363',
 		textColor: '#636363',
 		serifInside: false
@@ -34,7 +34,7 @@ Gauge.prototype.init = function() {
 			rx: this.radius,
 			ry: this.radius,
 			xAxisRotation: 0,
-			largeArcFlag: 1,
+			largeArcFlag: (this.defaults.angle >= 180 ? 1 : 0),
 			sweepFlag: 1,
 			x: coordinates.x + this.indent,
 			y: coordinates.y + this.indent,
