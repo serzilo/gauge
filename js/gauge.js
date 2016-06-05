@@ -4,8 +4,10 @@ function Gauge(data) {
 	this.defaults = {
 		id: 'gauge',
 		range: [0, 10, 20, 30, 40, 50, 60],
+		angle: 240,
 		stroke: '#636363',
-		textColor: '#636363'
+		textColor: '#636363',
+		serifInside: false
 	}
 
 	for (d in data){
@@ -14,33 +16,42 @@ function Gauge(data) {
 
 	console.log(this.defaults);
 
+	this.radius = 175;
+	this.indent = 30;
+	this.center = this.radius + this.indent;
+
 	this.init();
 }
 
 Gauge.prototype.init = function() {
-	var svg = this.initSvg(),
+	var svg = this.initSvg();
+		
+	this.emptyAngle = this.getEmptyAngle();
+	this.segmentInGrad = this.getSegmentInGrad();
+
+	var coordinates = this.getCoordinatesForPath(),
 		mainPath = this.drawPath({
-			mx: 50,
-			my: 310,
-			rx: 175,
-			ry: 175,
+			mx: coordinates.mx + this.indent,
+			my: coordinates.my + this.indent,
+			rx: this.radius,
+			ry: this.radius,
 			xAxisRotation: 0,
 			largeArcFlag: 1,
 			sweepFlag: 1,
-			x: 350,
-			y: 310,
+			x: coordinates.x + this.indent,
+			y: coordinates.y + this.indent,
 			className: 'mainPath'
 		});
 
 	svg.appendChild(mainPath);
 
-	this.emptyAngle = this.getEmptyAngle();
-	this.segmentInGrad = this.getSegmentInGrad();
-
 	for (var i = 0; i < this.defaults.range.length; i++){
 		var textElement = this.makeText(i);
 
 		svg.appendChild(textElement);
+
+		var serif = this.makeSerif(i);
+		svg.appendChild(serif);
 	}
 
 	document.getElementById(this.defaults.id).appendChild(svg);
@@ -50,13 +61,12 @@ Gauge.prototype.initSvg = function() {
 	var svg = document.createElementNS(this.NS, "svg");
 
  	svg.setAttribute('width','400px');
- 	svg.setAttribute('height','345px');
+ 	svg.setAttribute('height','400px');
 
 	return svg;
 }
 
 Gauge.prototype.drawPath = function(data) {
-	// var path = '<path d="M 70,70 A75,55   45              0, 1 160,140" />';
 	var path = document.createElementNS(this.NS, "path"),
 		d = "M " + data.mx + "," + data.my + " A" + data.rx + ","  + data.ry + " " + data.xAxisRotation + " " + data.largeArcFlag + ", "  + data.sweepFlag + " "  + data.x + ","  + data.y;
 
@@ -70,11 +80,40 @@ Gauge.prototype.drawPath = function(data) {
 	return path;
 }
 
+Gauge.prototype.drawLine = function(data) {
+	var path = document.createElementNS(this.NS, "path"),
+		d = "M" + data.mx + "," + data.my + " L"  + data.x + ","  + data.y;
+
+	path.setAttribute("d", d);
+	path.setAttribute("stroke", data.stroke || this.defaults.stroke);
+	path.setAttribute("fill", "none");
+	path.setAttribute("stroke-width", "3px");
+
+	path.setAttribute("class",  data.className || '');
+
+	return path;
+}
+
+Gauge.prototype.makeSerif = function(pos) {
+	var i = (this.segmentInGrad * pos) - this.emptyAngle,
+		x = this.getCoordX(i) + this.indent,
+		y = this.getCoordY(i) + this.indent,
+		line = this.drawLine({
+			mx: x,
+			my: y,
+			x: x + 10,
+			y: y + 10,
+			className: 'serif'
+		});
+
+	return line;
+}
+
 Gauge.prototype.text = function(data) {
 	var text = document.createElementNS(this.NS, "text");
 
-	text.setAttribute("x", data.x);
-	text.setAttribute("y", data.y);
+	text.setAttribute("x", data.x + this.indent);
+	text.setAttribute("y", data.y + this.indent);
 	text.setAttribute("font-family", "sans-serif");
 	text.setAttribute("font-size", "15px");
 	text.setAttribute("fill", this.defaults.textColor);
@@ -97,36 +136,15 @@ Gauge.prototype.makeText = function(pos) {
 }
 
 Gauge.prototype.textPosition = function(pos) {
-	var L = 350 - 50;
-	var h = 175 - Math.sqrt((Math.pow(175,2)) - (Math.pow(L,2) /4));
+	var i = (this.segmentInGrad * pos) - this.emptyAngle,
+		x = this.getCoordX(i, 10),
+		y = this.getCoordY(i, 10);
 
-	// console.log(h);
-
-	var cos = Math.cos(this.segmentInGrad * pos);
-	console.log('cos :' + cos);
-
-	var sin = Math.sin(this.segmentInGrad * pos);
-	console.log('sin: ' + sin);
-
-
-
-	var i = (this.segmentInGrad * pos) - this.emptyAngle;
-
-	var x = (175 + (185 * Math.cos((i-90) / 180 * Math.PI))) +5;
-	var y = (175 + (185 * Math.sin((i-90) / 180 * Math.PI))) + 45;
-
-
-	return {x: x + 15, y: y};
+	return {x: x, y: y};
 }
 
 Gauge.prototype.getEmptyAngle = function() {
-	var L = 350 - 50,
-		emptyAnleCos = (Math.pow(175,2) + Math.pow(175,2) - Math.pow(L,2)) / (2 * 175 * 175),
-		grad = this.getGradusFromCosinus(emptyAnleCos);
-
-	console.log(grad);
-
-	return grad;
+	return 360 - this.defaults.angle;
 }
 
 
@@ -137,11 +155,30 @@ Gauge.prototype.getGradusFromCosinus = function(val) {
 	return grad;
 }
 
-Gauge.prototype.getSegmentInGrad = function(val) {
-	var grad = (360 - this.emptyAngle) / this.defaults.range.length;
-
-	console.log(grad);
-
-	return grad;
+Gauge.prototype.getSegmentInGrad = function() {
+	return this.defaults.angle / this.defaults.range.length;
 }
+
+Gauge.prototype.getCoordinatesForPath = function() {
+	var mx = this.getCoordX(-this.emptyAngle),
+		my = this.getCoordY(-this.emptyAngle),
+		x = this.getCoordX(this.defaults.angle-this.emptyAngle),
+		y = this.getCoordY(this.defaults.angle-this.emptyAngle);
+
+	return {mx: mx, my: my, x: x, y: y};
+}
+
+Gauge.prototype.getCoordX = function(i, delta) {
+	var delta = delta || 0;
+
+	return (this.radius + ((this.radius + delta) * Math.cos((i-90) / 180 * Math.PI)));
+}
+
+Gauge.prototype.getCoordY = function(i, delta) {
+	var delta = delta || 0;
+
+	return (this.radius + ((this.radius + delta) * Math.sin((i-90) / 180 * Math.PI)));
+}
+
+
 
