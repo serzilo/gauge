@@ -10,11 +10,27 @@
 	</head>
 	<body>
 		<div id="gauge1"></div>
+
+		<div id="gauge2"></div>
+
+		<div id="gauge3"></div>
 		
 		<script>
 			new Gauge({
 				id: 'gauge1',
 				range: [0, 1, 2, 3, 4, 5, 6]
+			}); 
+
+			new Gauge({
+				id: 'gauge2',
+				range: [0, 10, 20, 30],
+				serifInside: true
+			}); 
+
+			new Gauge({
+				id: 'gauge3',
+				range: [0, 5, 10],
+				angle: 175
 			}); 
 		</script>
 		

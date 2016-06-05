@@ -14,10 +14,8 @@ function Gauge(data) {
 		this.defaults[d] = data[d];
 	}
 
-	console.log(this.defaults);
-
 	this.radius = 175;
-	this.indent = 30;
+	this.indent = 40;
 	this.center = this.radius + this.indent;
 
 	this.init();
@@ -55,13 +53,15 @@ Gauge.prototype.init = function() {
 	}
 
 	document.getElementById(this.defaults.id).appendChild(svg);
+
+	console.log(this);
 }
 
 Gauge.prototype.initSvg = function() {
 	var svg = document.createElementNS(this.NS, "svg");
 
- 	svg.setAttribute('width','400px');
- 	svg.setAttribute('height','400px');
+ 	svg.setAttribute('width','450px');
+ 	svg.setAttribute('height','450px');
 
 	return svg;
 }
@@ -96,13 +96,17 @@ Gauge.prototype.drawLine = function(data) {
 
 Gauge.prototype.makeSerif = function(pos) {
 	var i = (this.segmentInGrad * pos) - this.emptyAngle,
-		x = this.getCoordX(i) + this.indent,
-		y = this.getCoordY(i) + this.indent,
+		startIndent = (this.defaults.serifInside === false ? 20 : -10),
+		finishIndent = (this.defaults.serifInside === false ? 10 : -20),
+		mx = this.getCoordX(i, startIndent) + this.indent,
+		my = this.getCoordY(i, startIndent) + this.indent,
+		x = this.getCoordX(i, finishIndent) + this.indent,
+		y = this.getCoordY(i, finishIndent) + this.indent,
 		line = this.drawLine({
-			mx: x,
-			my: y,
-			x: x + 10,
-			y: y + 10,
+			mx: mx,
+			my: my,
+			x: x,
+			y: y,
 			className: 'serif'
 		});
 
@@ -137,8 +141,9 @@ Gauge.prototype.makeText = function(pos) {
 
 Gauge.prototype.textPosition = function(pos) {
 	var i = (this.segmentInGrad * pos) - this.emptyAngle,
-		x = this.getCoordX(i, 10),
-		y = this.getCoordY(i, 10);
+		startIndent = (this.defaults.serifInside === false ? 30 : -30),
+		x = this.getCoordX(i, startIndent),
+		y = this.getCoordY(i, startIndent);
 
 	return {x: x, y: y};
 }
@@ -156,7 +161,7 @@ Gauge.prototype.getGradusFromCosinus = function(val) {
 }
 
 Gauge.prototype.getSegmentInGrad = function() {
-	return this.defaults.angle / this.defaults.range.length;
+	return this.defaults.angle / (this.defaults.range.length - 1);
 }
 
 Gauge.prototype.getCoordinatesForPath = function() {
