@@ -87,6 +87,11 @@ Gauge.prototype.init = function() {
 		tempX = this.getX(beta),
 		tempY = this.getY(beta);
 
+	if (this.defaults.angle <= 180){
+		tempMY = 2 * this.radius - tempMY + this.indent + 10;
+		tempY = 2 * this.radius - tempY  + this.indent + 10;
+	}
+
 	console.log('tempMX: '+tempMX+' tempMY: '+tempMY);
 	console.log('tempX: '+tempX+' tempY: '+tempY);
 
@@ -245,6 +250,7 @@ Gauge.prototype.text = function(data) {
 	text.setAttribute("font-size", "15px");
 	text.setAttribute("fill", this.defaults.textColor);
 	text.setAttribute("class", 'gauge-text');
+	text.style.textAnchor = "middle";
 
 	text.innerHTML = data.value;
 
