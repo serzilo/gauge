@@ -4,7 +4,7 @@ function Gauge(data) {
 	this.defaults = {
 		id: 'gauge',
 		range: [0, 10, 20, 30, 40, 50, 60],
-		angle: 270,
+		angle: 275,
 		stroke: '#636363',
 		textColor: '#636363',
 		serifInside: false
@@ -27,8 +27,10 @@ Gauge.prototype.init = function() {
 	this.emptyAngle = this.getEmptyAngle();
 	this.segmentInGrad = this.getSegmentInGrad();
 
-	var coordinates = this.getCoordinatesForPath(),
-		mainPath = this.drawPath({
+	var coordinates = this.getCoordinatesForPath();
+
+	/*
+	var mainPath = this.drawPath({
 			mx: coordinates.mx + this.indent,
 			my: coordinates.my + this.indent,
 			rx: this.radius,
@@ -42,25 +44,160 @@ Gauge.prototype.init = function() {
 		});
 
 	svg.appendChild(mainPath);
+	*/
 
 	for (var i = 0; i < this.defaults.range.length; i++){
-		var textElement = this.makeText(i);
 
+		/*
+		var textElement = this.makeText(i);
 		svg.appendChild(textElement);
 
 		var serif = this.makeSerif(i);
 		svg.appendChild(serif);
+		*/
 	}
 
 	document.getElementById(this.defaults.id).appendChild(svg);
 
 	console.log(this);
+
+	var alpha, delta, beta;
+
+	if (this.defaults.angle <= 180) {
+		delta = (180 - this.defaults.angle) / 2;
+		alpha = this.defaults.angle + delta;
+		beta = alpha - this.defaults.angle;
+		
+	} else {
+		delta = (360 - this.defaults.angle) /2;
+		alpha = this.defaults.angle + delta;
+		beta =  alpha + 2 * delta;
+
+		alpha = -((this.defaults.angle -180) / 2) - (360 - this.defaults.angle);
+		beta = -((this.defaults.angle -180) / 2);
+	}
+
+	console.log('this.defaults.angle: '+this.defaults.angle)
+	console.log('delta: '+delta)
+	console.log('alpha: '+alpha)
+	console.log('beta: '+beta)
+
+	var tempMX = this.getX(alpha),
+		tempMY = this.getY(alpha),
+		tempX = this.getX(beta),
+		tempY = this.getY(beta);
+
+	console.log('tempMX: '+tempMX+' tempMY: '+tempMY);
+	console.log('tempX: '+tempX+' tempY: '+tempY);
+
+	var mainPath = this.drawPath({
+			mx: tempMX,
+			my: tempMY,
+			rx: this.radius,
+			ry: this.radius,
+			xAxisRotation: 0,
+			largeArcFlag: (this.defaults.angle > 180 ? 1 : 0),
+			sweepFlag: 1,
+			x: tempX,
+			y: tempY,
+			className: 'mainPath'
+		});
+
+	svg.appendChild(mainPath);
+
+	for (var i = 0; i < this.defaults.range.length; i++){
+		var textElement = this.makeText2(i, alpha);
+		svg.appendChild(textElement);
+
+		var serif = this.makeSerif2(i, alpha);
+		svg.appendChild(serif);
+	}
+}
+
+Gauge.prototype.makeText2 = function(pos, alpha) {
+	var alpha = alpha - (this.segmentInGrad * pos),
+		startIndent = (this.defaults.serifInside === false ? 30 : -30);
+
+	var tempMX = this.getX(alpha, startIndent),
+		tempMY = this.getY(alpha, startIndent),
+
+		text = this.text({
+			x: tempMX,
+			y: tempMY,
+			value: this.defaults.range[pos]
+		});
+
+	return text;
+}
+
+Gauge.prototype.makeText = function(pos) {
+	var postion = this.textPosition(pos),
+		text = this.text({
+			x: postion.x,
+			y: postion.y,
+			value: this.defaults.range[pos]
+		});
+
+	return text;
+}
+
+Gauge.prototype.makeSerif2 = function(pos, alpha) {
+	
+	var alpha = alpha - (this.segmentInGrad * pos),
+		startIndent = (this.defaults.serifInside === false ? 20 : -10),
+		finishIndent = (this.defaults.serifInside === false ? 10 : -20);
+
+	var tempMX = this.getX(alpha, startIndent),
+		tempMY = this.getY(alpha, startIndent),
+		tempX = this.getX(alpha, finishIndent),
+		tempY = this.getY(alpha, finishIndent);
+
+	var line = this.drawLine({
+			mx: tempMX,
+			my: tempMY,
+			x: tempX,
+			y: tempY,
+			className: 'serif'
+		});
+
+	return line;
+}
+
+Gauge.prototype.makeSerif = function(pos) {
+	var i = (this.segmentInGrad * pos) - this.emptyAngle,
+		startIndent = (this.defaults.serifInside === false ? 20 : -10),
+		finishIndent = (this.defaults.serifInside === false ? 10 : -20),
+		mx = this.getCoordX(i, startIndent) + this.indent,
+		my = this.getCoordY(i, startIndent) + this.indent,
+		x = this.getCoordX(i, finishIndent) + this.indent,
+		y = this.getCoordY(i, finishIndent) + this.indent,
+		line = this.drawLine({
+			mx: mx,
+			my: my,
+			x: x,
+			y: y,
+			className: 'serif'
+		});
+
+	return line;
+}
+
+Gauge.prototype.getX = function(alpha, delta) {
+	var k = (alpha < 0 ? -1 : 1);
+	var delta = delta || 0;
+	return (this.radius + this.indent + ((this.radius + delta) * Math.cos(k * alpha * Math.PI/180)));
+}
+
+Gauge.prototype.getY = function(alpha, delta) {
+	var k = (alpha < 0 ? -1 : 1);
+	var delta = delta || 0;
+	return (this.radius + this.indent + ((this.radius + delta) * Math.sin(k * alpha * Math.PI/180)));
 }
 
 Gauge.prototype.initSvg = function() {
 	var svg = document.createElementNS(this.NS, "svg");
 
- 	svg.setAttribute('width','450px');
+ 	svg.setAttribute('width','1450px');
  	svg.setAttribute('height','450px');
 
 	return svg;
@@ -94,47 +231,22 @@ Gauge.prototype.drawLine = function(data) {
 	return path;
 }
 
-Gauge.prototype.makeSerif = function(pos) {
-	var i = (this.segmentInGrad * pos) - this.emptyAngle,
-		startIndent = (this.defaults.serifInside === false ? 20 : -10),
-		finishIndent = (this.defaults.serifInside === false ? 10 : -20),
-		mx = this.getCoordX(i, startIndent) + this.indent,
-		my = this.getCoordY(i, startIndent) + this.indent,
-		x = this.getCoordX(i, finishIndent) + this.indent,
-		y = this.getCoordY(i, finishIndent) + this.indent,
-		line = this.drawLine({
-			mx: mx,
-			my: my,
-			x: x,
-			y: y,
-			className: 'serif'
-		});
 
-	return line;
-}
 
 Gauge.prototype.text = function(data) {
 	var text = document.createElementNS(this.NS, "text");
 
-	text.setAttribute("x", data.x + this.indent);
-	text.setAttribute("y", data.y + this.indent);
+	//text.setAttribute("x", data.x + this.indent);
+	//text.setAttribute("y", data.y + this.indent);
+
+	text.setAttribute("x", data.x);
+	text.setAttribute("y", data.y);
 	text.setAttribute("font-family", "sans-serif");
 	text.setAttribute("font-size", "15px");
 	text.setAttribute("fill", this.defaults.textColor);
 	text.setAttribute("class", 'gauge-text');
 
 	text.innerHTML = data.value;
-
-	return text;
-}
-
-Gauge.prototype.makeText = function(pos) {
-	var postion = this.textPosition(pos),
-		text = this.text({
-			x: postion.x,
-			y: postion.y,
-			value: this.defaults.range[pos]
-		});
 
 	return text;
 }
