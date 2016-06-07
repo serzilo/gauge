@@ -2,3 +2,32 @@ body {
 	margin: 0;
 	color: #323232;
 }
+
+.container {
+	text-align: center;
+}
+
+.svg-wrapper {
+	text-align: center;
+}
+
+/*
+	Customization classes:
+*/
+/*
+.gauge_main-path {
+    stroke: orange;
+}
+
+.gauge_text {
+    fill: red;
+}
+
+.gauge_serif {
+    stroke: green;
+}
+
+.gauge_path {
+    stroke: blue;
+}
+*/

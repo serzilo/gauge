@@ -12,7 +12,7 @@ function Gauge(data) {
 			{value: 50, color: '#f7a30c'},
 			{value: 60, color: '#fb0006'}
 		],
-		angle: 270,
+		angle: 260,
 		stroke:    '#636363',
 		textColor: '#636363',
 		serifInside: false
@@ -27,7 +27,7 @@ function Gauge(data) {
 	};
 
 	this.radius = 175;
-	this.indent = 40;
+	this.indent = 50;
 	this.center = this.radius + this.indent;
 
 	this.init();
@@ -93,7 +93,7 @@ Gauge.prototype.init = function() {
 		sweepFlag: 1,
 		x: X,
 		y: Y,
-		className: 'mainPath'
+		className: 'gauge_main-path'
 	});
 
 	svg.appendChild(mainPath);
@@ -140,7 +140,7 @@ Gauge.prototype.makeSegment = function(pos, alpha) {
 		x: X,
 		y: Y,
 		stroke: this.defaults.range[pos].color,
-		className: 'mainPath'
+		className: 'gauge_path'
 	});
 
 	return path;
@@ -173,7 +173,7 @@ Gauge.prototype.makeSerif = function(pos, alpha) {
 			my: MY,
 			x: X,
 			y: Y,
-			className: 'serif'
+			className: 'gauge_serif'
 		});
 
 	return line;
@@ -192,7 +192,7 @@ Gauge.prototype.getY = function(alpha, delta) {
 Gauge.prototype.initSvg = function() {
 	var svg = document.createElementNS(this.NS, "svg");
 
- 	svg.setAttribute('width','450px');
+ 	svg.setAttribute('width','500px');
  	svg.setAttribute('height','450px');
 
 	return svg;
@@ -232,7 +232,7 @@ Gauge.prototype.text = function(data) {
 	text.setAttribute("font-family", "sans-serif");
 	text.setAttribute("font-size", "15px");
 	text.setAttribute("fill", this.defaults.textColor);
-	text.setAttribute("class", 'gauge-text');
+	text.setAttribute("class", 'gauge_text');
 	text.style.textAnchor = "middle";
 	text.innerHTML = data.value;
 
