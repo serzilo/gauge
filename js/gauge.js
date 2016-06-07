@@ -87,11 +87,6 @@ Gauge.prototype.init = function() {
 		tempX = this.getX(beta),
 		tempY = this.getY(beta);
 
-	if (this.defaults.angle <= 180){
-		tempMY = 2 * this.radius - tempMY + this.indent + 10;
-		tempY = 2 * this.radius - tempY  + this.indent + 10;
-	}
-
 	console.log('tempMX: '+tempMX+' tempMY: '+tempMY);
 	console.log('tempX: '+tempX+' tempY: '+tempY);
 
@@ -188,15 +183,13 @@ Gauge.prototype.makeSerif = function(pos) {
 }
 
 Gauge.prototype.getX = function(alpha, delta) {
-	var k = (alpha < 0 ? -1 : 1);
 	var delta = delta || 0;
-	return (this.radius + this.indent + ((this.radius + delta) * Math.cos(k * alpha * Math.PI/180)));
+	return (this.radius + this.indent + ((this.radius + delta) * Math.cos(-1 * alpha * Math.PI/180)));
 }
 
 Gauge.prototype.getY = function(alpha, delta) {
-	var k = (alpha < 0 ? -1 : 1);
 	var delta = delta || 0;
-	return (this.radius + this.indent + ((this.radius + delta) * Math.sin(k * alpha * Math.PI/180)));
+	return (this.radius + this.indent + ((this.radius + delta) * Math.sin(-1 * alpha * Math.PI/180)));
 }
 
 Gauge.prototype.initSvg = function() {
