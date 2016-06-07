@@ -3,9 +3,17 @@ function Gauge(data) {
 
 	this.defaults = {
 		id: 'gauge',
-		range: [0, 10, 20, 30, 40, 50, 60],
-		angle: 275,
-		stroke: '#636363',
+		range: [
+			{value: 0},
+			{value: 10},
+			{value: 20},
+			{value: 30},
+			{value: 40},
+			{value: 50, color: '#f7a30c'},
+			{value: 60, color: '#fb0006'}
+		],
+		angle: 270,
+		stroke:    '#636363',
 		textColor: '#636363',
 		serifInside: false
 	}
@@ -14,11 +22,27 @@ function Gauge(data) {
 		this.defaults[d] = data[d];
 	}
 
+	if (!this.check()) {
+		return;
+	};
+
 	this.radius = 175;
 	this.indent = 40;
 	this.center = this.radius + this.indent;
 
 	this.init();
+}
+
+Gauge.prototype.check = function() {
+	if (this.defaults.angle < 1){
+		alert('Minimun angle: 1 deg');
+		return false;
+	} else if (this.defaults.angle > 359){
+		alert('Maximum angle: 359 deg');
+		return false;
+	}
+
+	return true;
 }
 
 Gauge.prototype.init = function() {
@@ -111,7 +135,45 @@ Gauge.prototype.init = function() {
 
 		var serif = this.makeSerif2(i, alpha);
 		svg.appendChild(serif);
+
+		if (this.defaults.range[i].color) {
+			var segment = this.makeSegment(i, alpha);
+			svg.appendChild(segment);
+		}
+		
 	}
+}
+
+Gauge.prototype.makeSegment = function(pos, alpha) {
+	var alphaStart = alpha - (this.segmentInGrad * pos) - (this.segmentInGrad / 2),
+		alphaFinish = alphaStart + this.segmentInGrad;
+
+	if (pos == 0) {
+		alphaFinish = alphaFinish - (this.segmentInGrad / 2);
+	} else if (pos == (this.defaults.range.length - 1)){
+		alphaStart = alphaStart + (this.segmentInGrad / 2);
+	}
+
+	var tempMX = this.getX(alphaStart),
+		tempMY = this.getY(alphaStart),
+		tempX = this.getX(alphaFinish),
+		tempY = this.getY(alphaFinish);
+
+	var path = this.drawPath({
+			mx: tempMX,
+			my: tempMY,
+			rx: this.radius,
+			ry: this.radius,
+			xAxisRotation: 0,
+			largeArcFlag: (Math.abs(alphaStart - alphaFinish)  > 180 ? 1 : 0),
+			sweepFlag: 0,
+			x: tempX,
+			y: tempY,
+			stroke: this.defaults.range[pos].color,
+			className: 'mainPath'
+		});
+
+	return path;
 }
 
 Gauge.prototype.makeText2 = function(pos, alpha) {
@@ -124,7 +186,7 @@ Gauge.prototype.makeText2 = function(pos, alpha) {
 		text = this.text({
 			x: tempMX,
 			y: tempMY,
-			value: this.defaults.range[pos]
+			value: this.defaults.range[pos].value
 		});
 
 	return text;
@@ -135,7 +197,7 @@ Gauge.prototype.makeText = function(pos) {
 		text = this.text({
 			x: postion.x,
 			y: postion.y,
-			value: this.defaults.range[pos]
+			value: this.defaults.range[pos].value
 		});
 
 	return text;
@@ -195,7 +257,7 @@ Gauge.prototype.getY = function(alpha, delta) {
 Gauge.prototype.initSvg = function() {
 	var svg = document.createElementNS(this.NS, "svg");
 
- 	svg.setAttribute('width','1450px');
+ 	svg.setAttribute('width','450px');
  	svg.setAttribute('height','450px');
 
 	return svg;
