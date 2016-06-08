@@ -19,7 +19,8 @@ function Gauge(data) {
 		arrowColor: '#1b97f1',
 		dotColor: '#e7e7e7',
 		arrowAnglePercents: 70,
-		dotsInSector: 4
+		dotsInSector: 4,
+		disableDotsInSector: false
 	}
 
 	for (d in data) {
@@ -123,7 +124,9 @@ Gauge.prototype.init = function() {
 			svg.appendChild(segment);
 		}
 
-		this.makeDots(i, alpha, svg);
+		if (this.defaults.disableDotsInSector === false){
+			this.makeDots(i, alpha, svg);
+		}
 	}
 
 	
