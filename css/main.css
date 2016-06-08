@@ -30,4 +30,14 @@ body {
 .gauge_path {
     stroke: blue;
 }
+
+.gauge_dot {
+	fill: blue;
+}
+
+.gauge_arrow_circle,
+.gauge_arrow_pointer{
+	fill: red;
+}
 */
+

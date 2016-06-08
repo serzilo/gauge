@@ -17,7 +17,9 @@ function Gauge(data) {
 		textColor: '#636363',
 		serifInside: false,
 		arrowColor: '#1b97f1',
-		arrowAnglePercents: 70
+		dotColor: '#e7e7e7',
+		arrowAnglePercents: 70,
+		dotsInSector: 4
 	}
 
 	for (d in data) {
@@ -120,13 +122,51 @@ Gauge.prototype.init = function() {
 			var segment = this.makeSegment(i, alpha);
 			svg.appendChild(segment);
 		}
+
+		this.makeDots(i, alpha, svg);
 	}
 
+	
 	this.makeArrow(svg);
 }
 
+Gauge.prototype.makeDots = function(pos, alpha, svg) {
+	if (pos < this.defaults.range.length - 1) {
+		var angleForDot = this.segmentInGrad / (this.defaults.dotsInSector + 1),
+			indent = (this.defaults.serifInside === false ? 20 : -10)
+
+		for (var i = 0; i < this.defaults.dotsInSector; i++) {
+			var beta = alpha - (this.segmentInGrad * pos) - ((i + 1) * angleForDot),
+				X = this.getX(beta, indent),
+				Y = this.getY(beta, indent),
+				dot = this.makeCircle(X, Y, {r: 2, fill: this.defaults.dotColor, className: 'gauge_dot'});
+
+			svg.appendChild(dot);
+		}
+	}
+}
+
+Gauge.prototype.makeSerif = function(pos, alpha) {
+	var alpha = alpha - (this.segmentInGrad * pos),
+		startIndent = (this.defaults.serifInside === false ? 20 : -10),
+		finishIndent = (this.defaults.serifInside === false ? 10 : -20),
+		MX = this.getX(alpha, startIndent),
+		MY = this.getY(alpha, startIndent),
+		X = this.getX(alpha, finishIndent),
+		Y = this.getY(alpha, finishIndent),
+		line = this.drawLine({
+			mx: MX,
+			my: MY,
+			x: X,
+			y: Y,
+			className: 'gauge_serif'
+		});
+
+	return line;
+}
+
 Gauge.prototype.makeArrow = function(svg) {
-	var circle = this.makeCircle(this.center, this.center);
+	var circle = this.makeCircle(this.center, this.center, {className: 'gauge_arrow_circle'});
 	svg.appendChild(circle);
 
 	var pointer = this.makePointer(this.center, this.center);
@@ -139,6 +179,7 @@ Gauge.prototype.makePointer = function(x, y) {
 	pointer.setAttribute("points", this.getPointerCords());
 	pointer.setAttribute("fill", this.defaults.arrowColor);
 	pointer.setAttribute("transform", 'rotate(' + this.getAngleForPointer() + ', ' + this.center + ', ' + this.center + ')');
+	pointer.setAttribute("class", 'gauge_arrow_pointer');
 
 	return pointer;
 }
@@ -146,7 +187,6 @@ Gauge.prototype.makePointer = function(x, y) {
 Gauge.prototype.getAngleForPointer = function() {
 	var relativeAngle = ((this.defaults.angle * this.defaults.arrowAnglePercents) / 100) - (this.defaults.angle / 2);
 
-	console.log('relativeAngle: ' + relativeAngle)
 	return relativeAngle;
 }
 
@@ -158,14 +198,19 @@ Gauge.prototype.getPointerCords = function() {
 	return p1 + ' ' + p2 + ' ' + p3;
 }
 
-Gauge.prototype.makeCircle = function(x, y) {
-	var circle = document.createElementNS(this.NS, "circle");
+Gauge.prototype.makeCircle = function(x, y, data) {
+	var circle = document.createElementNS(this.NS, "circle"),
+		stroke = (data && data.stroke ? data.stroke : this.defaults.arrowColor),
+		fill = (data && data.fill ? data.fill : this.defaults.arrowColor),
+		r = (data && data.r ? data.r : this.arrowCircleRadius),
+		className = (data && data.className ? data.className : '');
 
 	circle.setAttribute("cx", x);
 	circle.setAttribute("cy", y);
-	circle.setAttribute("stoke", this.defaults.arrowColor);
-	circle.setAttribute("fill", this.defaults.arrowColor);
-	circle.setAttribute("r", this.arrowCircleRadius);
+	circle.setAttribute("stoke", stroke);
+	circle.setAttribute("fill", fill);
+	circle.setAttribute("r", r);
+	circle.setAttribute("class", className);
 
 	return circle;
 }
@@ -216,25 +261,6 @@ Gauge.prototype.makeText = function(pos, alpha) {
 		});
 
 	return text;
-}
-
-Gauge.prototype.makeSerif = function(pos, alpha) {
-	var alpha = alpha - (this.segmentInGrad * pos),
-		startIndent = (this.defaults.serifInside === false ? 20 : -10),
-		finishIndent = (this.defaults.serifInside === false ? 10 : -20),
-		MX = this.getX(alpha, startIndent),
-		MY = this.getY(alpha, startIndent),
-		X = this.getX(alpha, finishIndent),
-		Y = this.getY(alpha, finishIndent),
-		line = this.drawLine({
-			mx: MX,
-			my: MY,
-			x: X,
-			y: Y,
-			className: 'gauge_serif'
-		});
-
-	return line;
 }
 
 Gauge.prototype.getX = function(alpha, delta) {
