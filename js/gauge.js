@@ -15,7 +15,9 @@ function Gauge(data) {
 		angle: 260,
 		stroke:    '#636363',
 		textColor: '#636363',
-		serifInside: false
+		serifInside: false,
+		arrowColor: '#1b97f1',
+		arrowAnglePercents: 70
 	}
 
 	for (d in data) {
@@ -29,6 +31,7 @@ function Gauge(data) {
 	this.radius = 175;
 	this.indent = 50;
 	this.center = this.radius + this.indent;
+	this.arrowCircleRadius = 10;
 
 	this.init();
 }
@@ -44,6 +47,14 @@ Gauge.prototype.check = function() {
 
 	if (this.defaults.range.length < 2) {
 		alert('Minimun range length: 2');
+		return false;
+	}
+
+	if (this.defaults.arrowAnglePercents < 0) {
+		alert('Minimun arrow angle in percents is 0');
+		return false;
+	} else if (this.defaults.arrowAnglePercents > 100) {
+		alert('Maximum arrow angle in percents is 100');
 		return false;
 	}
 
@@ -110,6 +121,53 @@ Gauge.prototype.init = function() {
 			svg.appendChild(segment);
 		}
 	}
+
+	this.makeArrow(svg);
+}
+
+Gauge.prototype.makeArrow = function(svg) {
+	var circle = this.makeCircle(this.center, this.center);
+	svg.appendChild(circle);
+
+	var pointer = this.makePointer(this.center, this.center);
+	svg.appendChild(pointer);
+}
+
+Gauge.prototype.makePointer = function(x, y) {
+	var pointer = document.createElementNS(this.NS, "polyline");
+
+	pointer.setAttribute("points", this.getPointerCords());
+	pointer.setAttribute("fill", this.defaults.arrowColor);
+	pointer.setAttribute("transform", 'rotate(' + this.getAngleForPointer() + ', ' + this.center + ', ' + this.center + ')');
+
+	return pointer;
+}
+
+Gauge.prototype.getAngleForPointer = function() {
+	var relativeAngle = ((this.defaults.angle * this.defaults.arrowAnglePercents) / 100) - (this.defaults.angle / 2);
+
+	console.log('relativeAngle: ' + relativeAngle)
+	return relativeAngle;
+}
+
+Gauge.prototype.getPointerCords = function() {
+	var p1 = (this.center - this.arrowCircleRadius / 2) + ','  + this.center,
+		p2 = (this.center + this.arrowCircleRadius / 2) + ','  + this.center,
+		p3 = this.center +',' + ((this.defaults.serifInside === false ? -25 : 15) + this.indent);
+
+	return p1 + ' ' + p2 + ' ' + p3;
+}
+
+Gauge.prototype.makeCircle = function(x, y) {
+	var circle = document.createElementNS(this.NS, "circle");
+
+	circle.setAttribute("cx", x);
+	circle.setAttribute("cy", y);
+	circle.setAttribute("stoke", this.defaults.arrowColor);
+	circle.setAttribute("fill", this.defaults.arrowColor);
+	circle.setAttribute("r", this.arrowCircleRadius);
+
+	return circle;
 }
 
 Gauge.prototype.makeSegment = function(pos, alpha) {
@@ -218,7 +276,7 @@ Gauge.prototype.drawLine = function(data) {
 	path.setAttribute("d", d);
 	path.setAttribute("stroke", data.stroke || this.defaults.stroke);
 	path.setAttribute("fill", "none");
-	path.setAttribute("stroke-width", "3px");
+	path.setAttribute("stroke-width", "2px");
 	path.setAttribute("class",  data.className || '');
 
 	return path;
