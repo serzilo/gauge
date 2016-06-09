@@ -29,7 +29,7 @@ function Gauge(data) {
 
 	if (!this.check()) {
 		return;
-	};
+	}
 
 	this.radius = 175;
 	this.indent = 50;
@@ -40,6 +40,11 @@ function Gauge(data) {
 }
 
 Gauge.prototype.check = function() {
+	if (!!document.getElementById(this.defaults.id) == false) {
+		alert('Node with id "' + this.defaults.id + '" not found');
+		return false;
+	}
+
 	if (this.defaults.angle < 1) {
 		alert('Minimun angle: 1 deg');
 		return false;
@@ -129,7 +134,6 @@ Gauge.prototype.init = function() {
 		}
 	}
 
-	
 	this.makeArrow(svg);
 }
 
@@ -169,10 +173,10 @@ Gauge.prototype.makeSerif = function(pos, alpha) {
 }
 
 Gauge.prototype.makeArrow = function(svg) {
-	var circle = this.makeCircle(this.center, this.center, {className: 'gauge_arrow_circle'});
-	svg.appendChild(circle);
+	var circle = this.makeCircle(this.center, this.center, {className: 'gauge_arrow_circle'}),
+		pointer = this.makePointer(this.center, this.center);
 
-	var pointer = this.makePointer(this.center, this.center);
+	svg.appendChild(circle);
 	svg.appendChild(pointer);
 }
 
@@ -268,11 +272,13 @@ Gauge.prototype.makeText = function(pos, alpha) {
 
 Gauge.prototype.getX = function(alpha, delta) {
 	var delta = delta || 0;
+	
 	return (this.radius + this.indent + ((this.radius + delta) * Math.cos(-1 * alpha * Math.PI/180)));
 }
 
 Gauge.prototype.getY = function(alpha, delta) {
 	var delta = delta || 0;
+
 	return (this.radius + this.indent + ((this.radius + delta) * Math.sin(-1 * alpha * Math.PI/180)));
 }
 
