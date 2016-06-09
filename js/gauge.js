@@ -272,7 +272,7 @@ Gauge.prototype.makeText = function(pos, alpha) {
 
 Gauge.prototype.getX = function(alpha, delta) {
 	var delta = delta || 0;
-	
+
 	return (this.radius + this.indent + ((this.radius + delta) * Math.cos(-1 * alpha * Math.PI/180)));
 }
 
