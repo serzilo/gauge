@@ -75,7 +75,7 @@ Gauge.prototype.init = function() {
 
 	document.getElementById(this.defaults.id).appendChild(svg);
 
-	console.log(this);
+	// console.log(this);
 
 	if (this.defaults.angle <= 180) {
 		delta = (180 - this.defaults.angle) / 2;
@@ -87,10 +87,10 @@ Gauge.prototype.init = function() {
 		beta = -((this.defaults.angle - 180) / 2);
 	}
 
-	console.log('entered angle: '+this.defaults.angle)
-	console.log('delta: '+delta)
-	console.log('alpha: '+alpha)
-	console.log('beta: '+beta)
+	// console.log('entered angle: '+this.defaults.angle)
+	// console.log('delta: '+delta)
+	// console.log('alpha: '+alpha)
+	// console.log('beta: '+beta)
 
 	MX = this.getX(alpha);
 	MY = this.getY(alpha);
@@ -332,4 +332,20 @@ Gauge.prototype.getEmptyAngle = function() {
 
 Gauge.prototype.getSegmentInGrad = function() {
 	return this.defaults.angle / (this.defaults.range.length - 1);
+}
+
+if (typeof jQuery == "undefined") {
+	console.log('jQuery undefined');
+} else {
+	console.log('jQuery defined');
+
+	jQuery.fn.gauge = function(options){
+		var options = options || {};
+
+		options.id = this.get(0).id;
+
+		new Gauge(options);
+
+		return this;
+	}
 }

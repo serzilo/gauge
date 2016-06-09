@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Gauge</title>
+		<meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+		<link rel="stylesheet" href="css/main.css">
+		<script src="js/jquery.js"></script>
+		<script src="js/gauge.js"></script>
+	</head>
+	<body>
+		<div class="container">
+			<div id="gauge1" class="svg-wrapper"></div>
+		</div>
+
+		<div class="container">
+			<div id="gauge2" class="svg-wrapper"></div>
+		</div>
+
+		<div class="container">
+			<div id="gauge3" class="svg-wrapper"></div>
+		</div>
+		
+		<script>
+			$('#gauge1').gauge();
+
+			$('#gauge2').gauge({
+				range: [
+					{value: 0, color: 'yellow'},
+					{value: 10},
+					{value: 20},
+					{value: 30, color: 'blue'}
+				],
+				serifInside: true,
+				angle: 90,
+				arrowAnglePercents: 0,
+				dotsInSector: 1,
+				dotColor: '#636363'
+			});
+
+			$('#gauge3').gauge({
+				range: [
+					{value: 0, color: 'yellow'},
+					{value: 50},
+					{value: 100, color: 'green'}
+				],
+				angle: 190,
+				arrowAnglePercents: 50,
+				dotsInSector: 1,
+				disableDotsInSector: true
+			});
+		</script>
+	</body>
+</html>
