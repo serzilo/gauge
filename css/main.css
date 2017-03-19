@@ -1,19 +1,22 @@
 body {
-	margin: 0;
-	color: #323232;
+    margin: 0;
+    color: #323232;
 }
 
 .container {
-	text-align: center;
+    text-align: center;
 }
 
 .svg-wrapper {
-	text-align: center;
+    text-align: center;
 }
+
 
 /*
 	Customization classes:
 */
+
+
 /*
 .gauge_main-path {
     stroke: orange;
@@ -41,3 +44,5 @@ body {
 }
 */
 
+
+/* 123 */
